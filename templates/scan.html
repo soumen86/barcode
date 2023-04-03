@@ -1,0 +1,175 @@
+{% extends "newdata.html" %}
+{% load bootstrap3 %}
+
+{% block content %}
+        <form role="form", action="/foodscan/", method="post">
+
+            {% csrf_token %}
+            <div class="text-left" class="form-group " style="background-color: blue";style = "text-align: left";style="width: 100%" >
+                <h1> Food coupn scan </h1>
+
+            </div>
+
+            <br><br>
+            
+<h3>Scanned Data</h3>
+<div class="col-sm-10" id="tables">
+            <table id="table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Lunch Cupon</th>
+						<th>Dinner Veg Cupon</th>
+						<th>Dinner NonVeg Cupon</th>
+						<th>Dinner Kid Cupon</th>
+						<th>Food Type</th>
+                        <th>Food Serviced</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+
+<style>
+div#tables {
+            height: 300px;
+            overflow: auto;
+        }
+
+        table,
+        th,
+        td {
+            border: 1px solid red;
+            border-collapse: collapse;
+
+            font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans';
+            padding: 10px;
+        }
+        .trColor3 {
+  background-color:yellow;
+  }
+  .odd{background-color: yellow;}
+
+  .even{background-color: red;}
+
+
+
+    </style>
+
+<script>
+
+   let code = "";
+let reading = false;
+
+document.addEventListener('keypress', e => {
+  //usually scanners throw an 'Enter' key at the end of read
+
+    if ($("#table tr").length > 1) {
+    //$('tr:last-child').remove();
+    $("#table tr:eq(1)").remove();
+    }
+
+   if (e.keyCode === 13) {
+           console.log("key hit");
+          console.log(code.length);
+          if(code.length >= 10) {
+            console.log(code);
+            /// code ready to use
+            $.ajax(
+    {
+        type:"GET",
+        url: "/scancode/"+code,
+
+        success: function( data )
+        {
+            code = "";
+            console.log("end");
+            console.log(data);
+
+            const tableElement = document.getElementById('table');
+            const trElement = document.createElement('tr');
+            const tbodyElement = document.createElement('tbody');
+            const nameEle = document.createElement('td');
+            const emailEle = document.createElement('td');
+            const lunchc = document.createElement('td');
+			const dinnervc = document.createElement('td');
+			const dinnernvc = document.createElement('td');
+			const dinnerkc = document.createElement('td');
+			const food_type = document.createElement('td');
+            const foods = document.createElement('td');
+
+            $.each(data.barcode_data, function () {
+                     console.log(this.name);
+                    nameEle.innerHTML = this.name;
+                    emailEle.innerHTML = this.email;
+                    lunchc.innerHTML = this.lunch;
+					dinnervc.innerHTML = this.dinnerv;
+					dinnernvc.innerHTML = this.dinnernv;
+					dinnerkc.innerHTML = this.dinnerkid;
+					food_type.innerHTML = this.food_type;
+                    foods.innerHTML = this.foods;
+                    if(this.foods == "AlreadyServed"){
+                        console.log("alreadyserverd");
+                        //$('.status').css("color", "red");
+
+
+                        trElement.appendChild(nameEle);
+                        trElement.appendChild(emailEle);
+                        trElement.appendChild(lunchc);
+						trElement.appendChild(dinnervc);
+						trElement.appendChild(dinnernvc);
+						trElement.appendChild(dinnerkc);
+						trElement.appendChild(food_type);
+                        trElement.appendChild(foods);
+                        tbodyElement.appendChild(trElement);
+                        tableElement.appendChild(tbodyElement);
+
+                        var table = document.getElementById("table");
+
+                        var rows = table.getElementsByTagName("tr");
+                        console.log(rows.length);
+
+                        for(i = 0; i < rows.length; i++){
+
+                      //manipulate rows
+
+
+                          if(i == 1){
+                             console.log(i);
+                            rows[i].className = "odd";
+                            }
+                            }
+                    }
+                    else{
+                        trElement.appendChild(nameEle);
+                        trElement.appendChild(emailEle);
+                        trElement.appendChild(lunchc);
+						trElement.appendChild(dinnervc);
+						trElement.appendChild(dinnernvc);
+						trElement.appendChild(dinnerkc);
+						trElement.appendChild(food_type);
+                        trElement.appendChild(foods);
+                        tbodyElement.appendChild(trElement);
+                        tableElement.appendChild(tbodyElement);
+                    }
+                 });
+        }
+     })
+            code = "";
+         }
+    } else {
+        code += e.key; //while this is not an 'enter' it stores the every key
+     }
+
+    //run a timeout of 200ms at the first read and clear everything
+    if(!reading) {
+        reading = true;
+        setTimeout(() => {
+            code = "";
+            reading = false;
+        }, 200);  //200 works fine for me but you can adjust it
+    }
+});
+</script>
+
+{% endblock content %}
