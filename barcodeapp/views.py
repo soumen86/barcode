@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.conf import settings
 from .forms import DataForm
-from qrcode import *
+#from qrcode import *
 from django.db import connection,models
 import barcode
 import time
