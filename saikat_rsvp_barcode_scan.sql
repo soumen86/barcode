@@ -31,7 +31,7 @@ CREATE TABLE `barcode_scan` (
   PRIMARY KEY (`ID`),
   KEY `barcode_scan_idx` (`food_update_id`),
   CONSTRAINT `barcode_scan` FOREIGN KEY (`food_update_id`) REFERENCES `food_update` (`ID`)
-) ENGINE=InnoDB AUTO_INCREMENT=121 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=134 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -40,7 +40,6 @@ CREATE TABLE `barcode_scan` (
 
 LOCK TABLES `barcode_scan` WRITE;
 /*!40000 ALTER TABLE `barcode_scan` DISABLE KEYS */;
-INSERT INTO `barcode_scan` VALUES (119,9,'lunch','1249378147552','Y'),(120,9,'lunch','1090841203431','Y');
 /*!40000 ALTER TABLE `barcode_scan` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -53,4 +52,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2023-04-16 17:15:18
+-- Dump completed on 2023-06-09 10:43:45
