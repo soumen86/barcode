@@ -39,6 +39,13 @@
                     <label for="btnGenerate">Click to generate</label>
                     <button type="submit" id="btnGenerate" name='generate' class="form-control btn btn-primary">Generate Barcode</button>
                 </div>
+
+            <br><br><br><br><br><br>
+                <div class="col-sm-2">
+                    <label for="autobtnGenerate">To genertae barcode for all RSVP entry</label>
+                    <button type="submit" id="autobtnGenerate" name='autogenerate' class="form-control btn btn-primary">Auto Generate Barcode</button>
+                </div>
+
         </form>
 
         {% if details_info %}
@@ -81,11 +88,18 @@
         <div class="qr-img">
             {% if img_name %}
                  {% for value1 in img_name %}
-                    <img src="/media/{{ value1.idata }}" alt="qr code">
+                    {% for key, value in value1.items %}
+                       <br><br> <b>{{ key }}: </b><br><br><img src="/media/{{ value }}" alt="qr code">
+                    {% endfor %}
                 {% endfor %}
             {% endif %}
         </div>
 
 
+    <script>
+        $(document).ready(function () {
+            $('#report1').DataTable();
+        });
+    </script>
 
 {% endblock content %}
