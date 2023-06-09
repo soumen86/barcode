@@ -13,6 +13,15 @@ from django.http import JsonResponse
 
 import random
 
+import smtplib, os
+from os.path import basename
+from email.mime.application import MIMEApplication
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.mime.base import MIMEBase
+from email import encoders
+from email.utils import COMMASPACE, formatdate
+
 FOOD_CHOICES = {"1": "Lunch",
                 "2": "Dinner"}
 
@@ -27,6 +36,55 @@ SERVICE_TYPE =(
     ("1", "Serviced"),
     ("2", "Not Services")
 )
+def send_mail(send_from, send_to, subject, text, files=None,
+              server="127.0.0.1"):
+    # instance of MIMEMultipart
+    msg = MIMEMultipart()
+    # storing the senders email address
+    msg['From'] = send_from
+    # storing the receivers email address
+    msg['To'] = send_to
+    # storing the subject
+    msg['Subject'] = subject
+
+    # string to store the body of the mail
+    body = text
+    # attach the body with the msg instance
+    msg.attach(MIMEText(body, 'plain'))
+
+    # open the file to be sent
+    filename = files
+    attachment = open(filename, "rb")
+
+    # instance of MIMEBase and named as p
+    p = MIMEBase('application', 'octet-stream')
+    # To change the payload into encoded form
+    p.set_payload((attachment).read())
+    # encode into base64
+    encoders.encode_base64(p)
+
+    p.add_header('Content-Disposition', "attachment; filename= %s" % filename)
+    # attach the instance 'p' to instance 'msg'
+    msg.attach(p)
+    # creates SMTP session
+    s = smtplib.SMTP('smtp.gmail.com', 587)
+
+    # start TLS for security
+    s.ehlo()
+    s.starttls()
+
+    # Authentication
+    print(send_from)
+    s.login(send_from, "flyryksfluycnyhl")
+
+    # Converts the Multipart msg into a string
+    text = msg.as_string()
+
+    # sending the mail
+    s.sendmail(send_from, send_to, text)
+
+    # terminating the session
+    s.quit()
 
 def footballclubs(request):
     print("footballclubs entry..")
@@ -188,7 +246,7 @@ def qr_gen(request):
         form = DataForm(request.POST)
         gform = form
 
-
+        name_info = str(gform.data['name_field'])
 
 
 
@@ -354,14 +412,14 @@ def qr_gen(request):
             elif('autogenerate' in request.POST):
                 name_info_list = []
                 with connection.cursor() as cursor:
-                    cursor.execute("select Name_Pri,Email from saikat_rsvp.rsvp_food")
+                    cursor.execute("select Name_Pri,Email from saikat_rsvp.rsvp_food where Email = 'ghosh.soumen86@gmail.com'")
                     res_email_list = dictfectchall(cursor)
                     for each_email in res_email_list:
                         name_info_list.append(each_email["Email"])
                 for name_info in name_info_list:
                     #name_info = str(gform.data['name_field'])
                     temp = FOOD_CHOICES[request.POST['food_field']]
-                    print("temp_data {0}".format(temp))
+                    print("temp_data +++ {0}".format(temp))
 
                     barcode1 = models.ImageField(upload_to=settings.MEDIA_ROOT, blank=True)
                     #bar = barcode.get_barcode(name=b_type, code=b_data, writer=ImageWriter())
@@ -403,8 +461,8 @@ def qr_gen(request):
                                         data_barcode = ""
                                         value = random.randint(1000000000000, 9999999999999)
                                         print("value = {0}".format(value))
-                                        img_name = f'qr_{time.time()}'
-                                        img_name = each_row["Name_Pri"] + "_" + img_name + "_lunch_" + str(fod_head_count)
+                                        #img_name = f'qr_{time.time()}'
+                                        #img_name = each_row["Name_Pri"] + "_" + img_name + "_lunch_" + str(fod_head_count)
                                         filename_map = {}
                                         '''for num in b_data:
                                             data_barcode = data_barcode + str(ord(num))'''
@@ -418,13 +476,21 @@ def qr_gen(request):
                                         print("ean {0}".format(ean))
                                         #buffer = BytesIO()
                                         #ean.write(buffer)
+                                        img_name = each_row["Name_Pri"] + "_" + str(ean) + "_lunch"
                                         filename_map["lunch_" + str(fod_head_count)] = ean.save(f'{settings.MEDIA_ROOT/img_name}')
                                         filename.append(filename_map)
                                         fod_head_count = fod_head_count - 1
-                                        insertq = "INSERT INTO saikat_rsvp.barcode_scan (food_update_id, food_type, barcode_num,food_service) VALUES ('{0}', 'lunch', '{1}','N')".format(id,ean)
+                                        insertq = "INSERT INTO saikat_rsvp.barcode_scan (food_update_id, food_type, barcode_num,food_service, filename) VALUES ('{0}', 'lunch', '{1}','N', '{2}')".format(id,ean, img_name)
                                         print("insertq {0}".format(insertq))
                                         cursor.execute(insertq)
                                         connection.commit()
+                                        files = os.path.join(settings.MEDIA_ROOT,img_name + ".png")
+                                        print("email file: {0}".format(files))
+                                        send_from = "ghosh.soumen86@gmail.com"
+                                        send_to = "ghosh.soumen86@gmail.com"
+                                        subject = "Barcode coupon for saikat picnic 2023"
+                                        text = "Take this email as coupon pass for picnic. check the attached file of our picnic barcode"
+                                        send_mail(send_from, send_to, subject, text, files)
                                 elif temp == "Dinner" and (each_row["dinnerv"] == 'N' and each_row["dinnernv"] == 'N' and each_row["dinnerkid"] == 'N'):
                                     update_q = "update saikat_rsvp.food_update as t1 inner join saikat_rsvp.rsvp_food as t2 set dinnerv='Y',dinnernv='Y',dinnerkid='Y' where t2.id = t1.rsvp_userid and t2.Email = '{0}'".format(name_info)
                                     print(update_q)
