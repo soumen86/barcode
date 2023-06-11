@@ -53,19 +53,24 @@ def send_mail(send_from, send_to, subject, text, files=None,
     msg.attach(MIMEText(body, 'plain'))
 
     # open the file to be sent
-    filename = files
-    attachment = open(filename, "rb")
+    #filename = files
+    #attachment = open(filename, "rb")
+    for f in files:  # add files to the message
+        #file_path = os.path.join(dir_path, f)
+        attachment = MIMEApplication(open(f, "rb").read(), _subtype="txt")
+        attachment.add_header('Content-Disposition','attachment', filename=f)
+        msg.attach(attachment)
 
     # instance of MIMEBase and named as p
-    p = MIMEBase('application', 'octet-stream')
+    #p = MIMEBase('application', 'octet-stream')
     # To change the payload into encoded form
-    p.set_payload((attachment).read())
+    #p.set_payload((attachment).read())
     # encode into base64
-    encoders.encode_base64(p)
+    #encoders.encode_base64(p)
 
-    p.add_header('Content-Disposition', "attachment; filename= %s" % filename)
+    #p.add_header('Content-Disposition', "attachment; filename= %s" % filename)
     # attach the instance 'p' to instance 'msg'
-    msg.attach(p)
+    #msg.attach(p)
     # creates SMTP session
     s = smtplib.SMTP('smtp.gmail.com', 587)
 
@@ -317,7 +322,7 @@ def qr_gen(request):
                             id = each_row["foodid"]
                             details_info.append(details)
 
-                            if temp == "Lunch" and each_row["lunch"] == 'Y':
+                            if temp == "Lunch" and each_row["lunch"] == 'N':
                                 update_q = "update saikat_rsvp.food_update as t1 inner join saikat_rsvp.rsvp_food as t2 set lunch='Y' where t2.id = t1.rsvp_userid and t2.Email = '{0}'".format(name_info)
                                 print(update_q)
                                 cursor.execute(update_q)
@@ -327,8 +332,8 @@ def qr_gen(request):
                                     data_barcode = ""
                                     value = random.randint(1000000000000, 9999999999999)
                                     print("value = {0}".format(value))
-                                    img_name = f'qr_{time.time()}'
-                                    img_name = each_row["Name_Pri"] + "_" + img_name + "_lunch_" + str(fod_head_count)
+                                    #img_name = f'qr_{time.time()}'
+                                    #img_name = each_row["Name_Pri"] + "_" + img_name + "_lunch_" + str(fod_head_count)
                                     filename_map = {}
                                     '''for num in b_data:
                                         data_barcode = data_barcode + str(ord(num))'''
@@ -339,13 +344,14 @@ def qr_gen(request):
                                     print("data_barcode {0}".format(data_barcode))
                                     EAN = barcode.get_barcode_class('ean13')
                                     ean = EAN(f'{int(str(data_barcode))}', writer=ImageWriter())
+                                    img_name = each_row["Name_Pri"] + "_" + str(ean) + "_lunch"
                                     print("ean {0}".format(ean))
                                     #buffer = BytesIO()
                                     #ean.write(buffer)
                                     filename_map["lunch_" + str(fod_head_count)] = ean.save(f'{settings.MEDIA_ROOT/img_name}')
                                     filename.append(filename_map)
                                     fod_head_count = fod_head_count - 1
-                                    insertq = "INSERT INTO saikat_rsvp.barcode_scan (food_update_id, food_type, barcode_num,food_service) VALUES ('{0}', 'lunch', '{1}','N')".format(id,ean)
+                                    insertq = "INSERT INTO saikat_rsvp.barcode_scan (food_update_id, food_type, barcode_num,food_service, filename) VALUES ('{0}', 'lunch', '{1}','N', '{2}')".format(id,ean, img_name)
                                     print("insertq {0}".format(insertq))
                                     cursor.execute(insertq)
                                     connection.commit()
@@ -366,8 +372,8 @@ def qr_gen(request):
                                     data_barcode = ""
                                     value = random.randint(1000000000000, 9999999999999)
                                     print("value = {0}".format(value))
-                                    img_name_d = f'qr_{time.time()}'
-                                    img_name_d = each_row["Name_Pri"] + "_" + img_name_d
+                                    #img_name_d = f'qr_{time.time()}'
+                                    #img_name_d = each_row["Name_Pri"] + "_" + img_name_d
                                     filename_map = {}
                                     '''for num in b_data:
                                         data_barcode = data_barcode + str(ord(num))'''
@@ -381,26 +387,29 @@ def qr_gen(request):
                                     if (vcount > 0):
                                         ean = EAN(f'{int(str(data_barcode))}', writer=ImageWriter())
                                         print("ean {0}".format(ean))
-                                        img_name_d = img_name_d + '_dinner_veg_' + str(vcount)
-                                        filename_map["dinner_veg_" +str(vcount)] = ean.save(f'{settings.MEDIA_ROOT/img_name_d}.png')
+                                        #img_name_d = img_name_d + '_dinner_veg_' + str(vcount)
+                                        img_name_d = each_row["Name_Pri"] + "_" + str(ean) + "_dinner_veg"
+                                        filename_map["dinner_veg_" +str(vcount)] = ean.save(f'{settings.MEDIA_ROOT/img_name_d}')
                                         filename.append(filename_map)
-                                        insertq = "INSERT INTO saikat_rsvp.barcode_scan (food_update_id, food_type, barcode_num,food_service) VALUES ('{0}', 'dinner_veg', '{1}','N')".format(id,ean)
+                                        insertq = "INSERT INTO saikat_rsvp.barcode_scan (food_update_id, food_type, barcode_num,food_service, filename) VALUES ('{0}', 'dinner_veg', '{1}','N', '{2}')".format(id,ean,img_name)
                                         vcount = vcount - 1
                                     elif(nvcount > 0):
                                         ean = EAN(f'{int(str(data_barcode))}', writer=ImageWriter())
                                         print("ean {0}".format(ean))
-                                        img_name_d = img_name_d + '_dinner_nveg_' + str(nvcount)
+                                        #img_name_d = img_name_d + '_dinner_nveg_' + str(nvcount)
+                                        img_name_d = each_row["Name_Pri"] + "_" + str(ean) + "_dinner_nveg"
                                         filename_map["dinner_nveg_" +str(nvcount)] = ean.save(f'{settings.MEDIA_ROOT/img_name_d}.png')
                                         filename.append(filename_map)
-                                        insertq = "INSERT INTO saikat_rsvp.barcode_scan (food_update_id, food_type, barcode_num,food_service) VALUES ('{0}', 'dinner_nveg', '{1}','N')".format(id,ean)
+                                        insertq = "INSERT INTO saikat_rsvp.barcode_scan (food_update_id, food_type, barcode_num,food_service,filename) VALUES ('{0}', 'dinner_nveg', '{1}','N', '{2}')".format(id,ean,filename)
                                         nvcount = nvcount - 1
                                     elif(kcount > 0):
                                         ean = EAN(f'{int(str(data_barcode))}', writer=ImageWriter())
                                         print("ean {0}".format(ean))
-                                        img_name_d = img_name_d + '_dinner_kid_' + str(kcount)
+                                        #img_name_d = img_name_d + '_dinner_kid_' + str(kcount)
+                                        img_name_d = each_row["Name_Pri"] + "_" + str(ean) + "_dinner_kid"
                                         filename_map["dinner_kid_" +str(kcount)] = ean.save(f'{settings.MEDIA_ROOT/img_name_d}.png')
                                         filename.append(filename_map)
-                                        insertq = "INSERT INTO saikat_rsvp.barcode_scan (food_update_id, food_type, barcode_num,food_service) VALUES ('{0}', 'dinner_kid', '{1}','N')".format(id,ean)
+                                        insertq = "INSERT INTO saikat_rsvp.barcode_scan (food_update_id, food_type, barcode_num,food_service,filename) VALUES ('{0}', 'dinner_kid', '{1}','N', '{2}')".format(id,ean,filename)
                                         kcount = kcount - 1
                                     fod_head_count_dinner = fod_head_count_dinner - 1
 
@@ -412,7 +421,8 @@ def qr_gen(request):
             elif('autogenerate' in request.POST):
                 name_info_list = []
                 with connection.cursor() as cursor:
-                    cursor.execute("select Name_Pri,Email from saikat_rsvp.rsvp_food where Email = 'ghosh.soumen86@gmail.com'")
+                    #cursor.execute("select Name_Pri,Email from saikat_rsvp.rsvp_food where Email = 'ghosh.soumen86@gmail.com'")
+                    cursor.execute("select Name_Pri,Email from saikat_rsvp.rsvp_food")
                     res_email_list = dictfectchall(cursor)
                     for each_email in res_email_list:
                         name_info_list.append(each_email["Email"])
@@ -432,6 +442,7 @@ def qr_gen(request):
 
                     with connection.cursor() as cursor:
                         cursor.execute("select Name_Pri,Email,Lunch_all,Dinner_veg,Dinner_nveg,Dinner_kid,Volunteering,lunch,dinnerv,dinnernv,dinnerkid,t2.id as foodid from saikat_rsvp.rsvp_food as t1 inner join saikat_rsvp.food_update as t2 where t1.id = t2.rsvp_userid and t1.Email = '{0}'".format(name_info))
+                        #cursor.execute("select Name_Pri,Email,Lunch_all,Dinner_veg,Dinner_nveg,Dinner_kid,Volunteering,lunch,dinnerv,dinnernv,dinnerkid,t2.id as foodid from saikat_rsvp.rsvp_food as t1 inner join saikat_rsvp.food_update as t2 where t1.id = t2.rsvp_userid and t1.Email = '{0}'".format(name_info))
                         res = dictfectchall(cursor)
                         print("done")
                         if res and len(res) > 0:
@@ -450,7 +461,7 @@ def qr_gen(request):
                                 fod_head_count = each_row["Lunch_all"]
                                 id = each_row["foodid"]
                                 details_info.append(details)
-
+                                file_list = []
                                 if temp == "Lunch" and each_row["lunch"] == 'N':
                                     update_q = "update saikat_rsvp.food_update as t1 inner join saikat_rsvp.rsvp_food as t2 set lunch='Y' where t2.id = t1.rsvp_userid and t2.Email = '{0}'".format(name_info)
                                     print(update_q)
@@ -479,18 +490,20 @@ def qr_gen(request):
                                         img_name = each_row["Name_Pri"] + "_" + str(ean) + "_lunch"
                                         filename_map["lunch_" + str(fod_head_count)] = ean.save(f'{settings.MEDIA_ROOT/img_name}')
                                         filename.append(filename_map)
+                                        files = os.path.join(settings.MEDIA_ROOT,img_name + ".png")
+                                        file_list.append(files)
                                         fod_head_count = fod_head_count - 1
                                         insertq = "INSERT INTO saikat_rsvp.barcode_scan (food_update_id, food_type, barcode_num,food_service, filename) VALUES ('{0}', 'lunch', '{1}','N', '{2}')".format(id,ean, img_name)
                                         print("insertq {0}".format(insertq))
                                         cursor.execute(insertq)
                                         connection.commit()
-                                        files = os.path.join(settings.MEDIA_ROOT,img_name + ".png")
-                                        print("email file: {0}".format(files))
-                                        send_from = "ghosh.soumen86@gmail.com"
-                                        send_to = "ghosh.soumen86@gmail.com"
-                                        subject = "Barcode coupon for saikat picnic 2023"
-                                        text = "Take this email as coupon pass for picnic. check the attached file of our picnic barcode"
-                                        send_mail(send_from, send_to, subject, text, files)
+
+                                    send_from = "ghosh.soumen86@gmail.com"
+                                    send_to = "barun@saikat.org"
+                                    #send_to = "ghosh.soumen86@gmail.com"
+                                    subject = "Barcode coupon for saikat picnic 2023 " + name_info
+                                    text = "As notified in previous email regarding pionaring for coupon digitization" + "\n" + "Please find coupons pass for picnic." + "\n" + "If you have any question please contact at welcom desk or ec@saikat.org"
+                                    send_mail(send_from, send_to, subject, text, file_list)
                                 elif temp == "Dinner" and (each_row["dinnerv"] == 'N' and each_row["dinnernv"] == 'N' and each_row["dinnerkid"] == 'N'):
                                     update_q = "update saikat_rsvp.food_update as t1 inner join saikat_rsvp.rsvp_food as t2 set dinnerv='Y',dinnernv='Y',dinnerkid='Y' where t2.id = t1.rsvp_userid and t2.Email = '{0}'".format(name_info)
                                     print(update_q)
@@ -508,8 +521,8 @@ def qr_gen(request):
                                         data_barcode = ""
                                         value = random.randint(1000000000000, 9999999999999)
                                         print("value = {0}".format(value))
-                                        img_name_d = f'qr_{time.time()}'
-                                        img_name_d = each_row["Name_Pri"] + "_" + img_name_d
+                                        #img_name_d = f'qr_{time.time()}'
+                                        #img_name_d = each_row["Name_Pri"] + "_" + img_name_d
                                         filename_map = {}
                                         '''for num in b_data:
                                             data_barcode = data_barcode + str(ord(num))'''
@@ -523,26 +536,29 @@ def qr_gen(request):
                                         if (vcount > 0):
                                             ean = EAN(f'{int(str(data_barcode))}', writer=ImageWriter())
                                             print("ean {0}".format(ean))
-                                            img_name_d = img_name_d + '_dinner_veg_' + str(vcount)
-                                            filename_map["dinner_veg_" +str(vcount)] = ean.save(f'{settings.MEDIA_ROOT/img_name_d}.png')
+                                            #img_name_d = img_name_d + '_dinner_veg_' + str(vcount)
+                                            img_name_d = each_row["Name_Pri"] + "_" + str(ean) + "_dinner_veg"
+                                            filename_map["dinner_veg_" +str(vcount)] = ean.save(f'{settings.MEDIA_ROOT/img_name_d}')
                                             filename.append(filename_map)
-                                            insertq = "INSERT INTO saikat_rsvp.barcode_scan (food_update_id, food_type, barcode_num,food_service) VALUES ('{0}', 'dinner_veg', '{1}','N')".format(id,ean)
+                                            insertq = "INSERT INTO saikat_rsvp.barcode_scan (food_update_id, food_type, barcode_num,food_service, filename) VALUES ('{0}', 'dinner_veg', '{1}','N', '{2}')".format(id,ean, img_name_d)
                                             vcount = vcount - 1
                                         elif(nvcount > 0):
                                             ean = EAN(f'{int(str(data_barcode))}', writer=ImageWriter())
                                             print("ean {0}".format(ean))
-                                            img_name_d = img_name_d + '_dinner_nveg_' + str(nvcount)
-                                            filename_map["dinner_nveg_" +str(nvcount)] = ean.save(f'{settings.MEDIA_ROOT/img_name_d}.png')
+                                            #img_name_d = img_name_d + '_dinner_nveg_' + str(nvcount)
+                                            img_name_d = each_row["Name_Pri"] + "_" + str(ean) + "_dinner_nveg"
+                                            filename_map["dinner_nveg_" +str(nvcount)] = ean.save(f'{settings.MEDIA_ROOT/img_name_d}')
                                             filename.append(filename_map)
-                                            insertq = "INSERT INTO saikat_rsvp.barcode_scan (food_update_id, food_type, barcode_num,food_service) VALUES ('{0}', 'dinner_nveg', '{1}','N')".format(id,ean)
+                                            insertq = "INSERT INTO saikat_rsvp.barcode_scan (food_update_id, food_type, barcode_num,food_service, filename) VALUES ('{0}', 'dinner_nveg', '{1}','N' , '{2}')".format(id,ean, img_name_d)
                                             nvcount = nvcount - 1
                                         elif(kcount > 0):
                                             ean = EAN(f'{int(str(data_barcode))}', writer=ImageWriter())
                                             print("ean {0}".format(ean))
-                                            img_name_d = img_name_d + '_dinner_kid_' + str(kcount)
-                                            filename_map["dinner_kid_" +str(kcount)] = ean.save(f'{settings.MEDIA_ROOT/img_name_d}.png')
+                                            #img_name_d = img_name_d + '_dinner_kid_' + str(kcount)
+                                            img_name_d = each_row["Name_Pri"] + "_" + str(ean) + "_dinner_kid"
+                                            filename_map["dinner_kid_" +str(kcount)] = ean.save(f'{settings.MEDIA_ROOT/img_name_d}')
                                             filename.append(filename_map)
-                                            insertq = "INSERT INTO saikat_rsvp.barcode_scan (food_update_id, food_type, barcode_num,food_service) VALUES ('{0}', 'dinner_kid', '{1}','N')".format(id,ean)
+                                            insertq = "INSERT INTO saikat_rsvp.barcode_scan (food_update_id, food_type, barcode_num,food_service, filename) VALUES ('{0}', 'dinner_kid', '{1}','N', '{2}')".format(id,ean, img_name_d)
                                             kcount = kcount - 1
                                         fod_head_count_dinner = fod_head_count_dinner - 1
 
