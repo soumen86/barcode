@@ -22,6 +22,8 @@ from email.mime.base import MIMEBase
 from email import encoders
 from email.utils import COMMASPACE, formatdate
 
+from barcode.writer import SVGWriter
+
 FOOD_CHOICES = {"1": "Lunch",
                 "2": "Dinner"}
 
@@ -345,10 +347,13 @@ def qr_gen(request):
                                     EAN = barcode.get_barcode_class('ean13')
                                     ean = EAN(f'{int(str(data_barcode))}', writer=ImageWriter())
                                     img_name = each_row["Name_Pri"] + "_" + str(ean) + "_lunch"
+                                    ean.save(f'{settings.MEDIA_ROOT/img_name}')
+                                    filename_map["lunch_" + str(fod_head_count)] = img_name + ".png"
+                                    
                                     print("ean {0}".format(ean))
                                     #buffer = BytesIO()
                                     #ean.write(buffer)
-                                    filename_map["lunch_" + str(fod_head_count)] = ean.save(f'{settings.MEDIA_ROOT/img_name}')
+                                    #filename_map["lunch_" + str(fod_head_count)] = ean.save(f'{settings.MEDIA_ROOT/img_name}')
                                     filename.append(filename_map)
                                     fod_head_count = fod_head_count - 1
                                     insertq = "INSERT INTO saikat_rsvp.barcode_scan (food_update_id, food_type, barcode_num,food_service, filename) VALUES ('{0}', 'lunch', '{1}','N', '{2}')".format(id,ean, img_name)
@@ -487,8 +492,14 @@ def qr_gen(request):
                                         print("ean {0}".format(ean))
                                         #buffer = BytesIO()
                                         #ean.write(buffer)
+                                        
                                         img_name = each_row["Name_Pri"] + "_" + str(ean) + "_lunch"
-                                        filename_map["lunch_" + str(fod_head_count)] = ean.save(f'{settings.MEDIA_ROOT/img_name}')
+                                        ean.save(f'{settings.MEDIA_ROOT/img_name}')
+                                        filename_map["lunch_" + str(fod_head_count)] = img_name + ".png"
+                                    
+                                    
+                                        #img_name = each_row["Name_Pri"] + "_" + str(ean) + "_lunch"
+                                        #filename_map["lunch_" + str(fod_head_count)] = ean.save(f'{settings.MEDIA_ROOT/img_name}')
                                         filename.append(filename_map)
                                         files = os.path.join(settings.MEDIA_ROOT,img_name + ".png")
                                         file_list.append(files)
@@ -568,7 +579,8 @@ def qr_gen(request):
                                 elif temp == "Lunch" and each_row["lunch"] == 'Y':
                                     nameimg = 'lunch.jpg'
                                     filename_map = {}
-                                    filename_map["idata"] = settings.MEDIA_ROOT/nameimg
+                                    #filename_map["idata"] = settings.MEDIA_ROOT/nameimg
+                                    filename_map["idata"] = nameimg
                                     filename.append(filename_map)
 
                 return render(request, 'index.html', {'form':form, 'details_info':details_info,'img_name':filename,'barcode_types': [b for b in barcode.PROVIDED_BARCODES if str(b).startswith('code')] + ['qrcode']})
