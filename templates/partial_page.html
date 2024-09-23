@@ -1,0 +1,104 @@
+{% extends "newdata.html" %}
+{% load bootstrap3 %}
+
+{% block content %}
+<div class="col-sm-10">
+           <table id='report2' >
+                <thead>
+                        <th>Index #</th>
+                        <th>ID</th>
+                        <th>RSVP ID</th>
+                        <th>FOOD ID</th>
+						<th>Name</th>
+						<th>Food Type</th>
+						<th>Email</th>
+                        <th>Barcode Num</th>
+                        <th>Food service</th>
+                        <th>Filename</th>
+
+                </thead>
+                {% for value in file_hist_data %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                 <td>{{ value.id }}</td>
+                <td>{{ value.rsvpid }}</td>
+                <td>{{ value.food_update_id }}</td>
+                <td>{{ value.name }}</td>
+                <td>{{ value.food_type }}</td>
+                <td>{{ value.email }}</td>
+                <td>{{ value.barcode_num }}</td>
+                 <td>{{ value.food_service }}</td>
+                 <td>{{ value.filename }}</td>
+
+                <td>
+            <button onclick="editData(this)">update</button>
+
+
+        </td>
+
+             </tr>
+        {% endfor %}
+            </table>
+        </div>
+
+<style>
+div#tables {
+            height: 300px;
+            overflow: auto;
+        }
+
+        table,
+        th,
+        td {
+            border: 1px solid red;
+            border-collapse: collapse;
+
+            font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans';
+            padding: 10px;
+        }
+        .trColor3 {
+  background-color:yellow;
+  }
+  .odd{background-color: yellow;}
+
+  .even{background-color: green;}
+
+  .invalid{background-color: red;}
+
+
+
+    </style>
+
+    <script>
+        function editData(button) {
+
+            // Get the parent row of the clicked button
+            let row = button.parentNode.parentNode;
+
+            // Get the cells within the row
+            let nameCell = row.cells[7];
+            let code = nameCell.innerHTML;
+           console.log("edit function");
+           console.log(code);
+           $.ajax(
+            {
+                    type:"GET",
+
+                 data: {
+
+                        csrfmiddlewaretoken: '{{ csrf_token }}'
+                    },
+                    url: "/invalidation/"+code,
+
+                success: function(data, response) {
+                  console.log(response);
+                  alert(response);
+                    //$('#report2').DataTable(data);
+                   //$("#report2").hide(); // first hide the current table
+            //$("#report2").append(response); // and append the data
+                  },
+             })
+        }
+    </script>
+
+{% endblock content %}

@@ -1,0 +1,342 @@
+{% extends "newdata.html" %}
+{% load bootstrap3 %}
+
+{% block content %}
+        <form role="form", action="/viewinfo/", method="post">
+
+            {% csrf_token %}
+            <div class="text-left" class="form-group " style="background-color: blue";style = "text-align: left";style="width: 100%" >
+                <h1> Food coupn Info </h1>
+
+            </div>
+
+            <br><br>
+            
+<h3>Scanned Data</h3>
+<div class="col-sm-10" id="tables">
+            <table id="table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Lunch Cupon</th>
+						<th>Dinner Veg Cupon</th>
+						<th>Dinner NonVeg Cupon</th>
+						<th>Dinner Kid Cupon</th>
+                        <th>Snacks veg count</th>
+                        <th>Snacks non-veg count</th>
+                        <th>Dinner veg count</th>
+                        <th>Dinner non-veg count</th>
+                        <th>Dinner kid count</th>
+                        <th>Total dinner</th>
+                        <th>Barcode Num</th>
+						<th>Food Type</th>
+                        <th>Food Serviced</th>
+                        <th>food_update_id</th>
+                        <th>checkin</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+
+<div class="col-sm-11" id="totalcounts">
+<table id="totalcount">
+    <thead>
+        <tr>
+            <th>Total Lunch</th>
+            <th>Total Dinner Veg</th>
+            <th>Total Dinner NonVeg</th>
+            <th>Total Dinner Kid</th>
+
+        </tr>
+    </thead>
+</table>
+</div>
+<style>
+
+div#totalcounts {
+            height: 300px;
+            overflow: auto;
+        }
+
+        totalcount,
+        th,
+        td {
+            border: 1px solid red;
+            border-collapse: collapse;
+
+            font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans';
+            padding: 10px;
+        }
+
+div#tables {
+            height: 300px;
+            overflow: auto;
+        }
+
+        table,
+        th,
+        td {
+            border: 1px solid red;
+            border-collapse: collapse;
+
+            font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans';
+            padding: 10px;
+        }
+        .trColor3 {
+  background-color:yellow;
+  }
+  .odd{background-color: yellow;}
+
+  .even{background-color: green;}
+
+  .invalid{background-color: red;}
+
+
+
+    </style>
+
+<script>
+
+   let code = "";
+let reading = false;
+
+document.addEventListener('keypress', e => {
+  //usually scanners throw an 'Enter' key at the end of read
+
+    if ($("#table tr").length > 1) {
+    //$('tr:last-child').remove();
+    $("#table tr:eq(1)").remove();
+    $("#totalcount tr:eq(1)").remove();
+    }
+
+   if (e.keyCode === 13) {
+           console.log("key hit");
+          console.log(code.length);
+          if(code.length >= 10) {
+            console.log(code);
+            /// code ready to use
+            $.ajax(
+    {
+        type:"GET",
+        url: "/viewcode/"+code,
+
+        success: function( data )
+        {
+            code = "";
+            console.log("end");
+            console.log(data);
+
+            const tableElement = document.getElementById('table');
+            const trElement = document.createElement('tr');
+            const tbodyElement = document.createElement('tbody');
+            const nameEle = document.createElement('td');
+            const emailEle = document.createElement('td');
+            const lunchc = document.createElement('td');
+			const dinnervc = document.createElement('td');
+			const dinnernvc = document.createElement('td');
+			const dinnerkc = document.createElement('td');
+			const snacksvegc = document.createElement('td');
+			const snacksnvegc = document.createElement('td');
+			const dinnervcount = document.createElement('td');
+			const dinnernvcount = document.createElement('td');
+			const dinnerkidcount = document.createElement('td');
+			const totaldinnercount = document.createElement('td');
+			const barcodenum = document.createElement('td');
+			const food_type = document.createElement('td');
+            const foods = document.createElement('td');
+            const food_update_id = document.createElement('td');
+            const checkin = document.createElement('checkin');
+
+
+            const tableElement_rsvpcount = document.getElementById('totalcount');
+            const trElement_rsvpcount = document.createElement('tr');
+            const tbodyElement_rsvpcount = document.createElement('tbody');
+            const total_lunch = document.createElement('td');
+            const total_dinner_veg = document.createElement('td');
+            const total_dinner_nveg = document.createElement('td');
+			const total_dinner_kid = document.createElement('td');
+
+            total_lunch.innerHTML = data.lunch_count;
+            total_dinner_veg.innerHTML = data.dinner_veg_count;
+            total_dinner_nveg.innerHTML = data.dinner_nveg_count;
+            total_dinner_kid.innerHTML = data.dinner_kid_count;
+
+            trElement_rsvpcount.appendChild(total_lunch);
+            trElement_rsvpcount.appendChild(total_dinner_veg);
+            trElement_rsvpcount.appendChild(total_dinner_nveg);
+            trElement_rsvpcount.appendChild(total_dinner_kid);
+
+            tbodyElement_rsvpcount.appendChild(trElement_rsvpcount);
+            tableElement_rsvpcount.appendChild(tbodyElement_rsvpcount);
+
+            $.each(data.barcode_data, function () {
+                     console.log(this.name);
+                    nameEle.innerHTML = this.name;
+                    emailEle.innerHTML = this.email;
+                    lunchc.innerHTML = this.lunch;
+					dinnervc.innerHTML = this.dinnerv;
+					dinnernvc.innerHTML = this.dinnernv;
+					dinnerkc.innerHTML = this.dinnerkid;
+					snacksvegc.innerHTML = this.Snacks_veg;
+					snacksnvegc.innerHTML = this.Snacks_nveg;
+					dinnervcount.innerHTML = this.Dinner_veg;
+					dinnernvcount.innerHTML = this.Dinner_nveg;
+					dinnerkidcount.innerHTML = this.Dinner_kid;
+					totaldinnercount.innerHTML = this.total_dinner;
+					barcodenum.innerHTML = this.barcode_num;
+					food_type.innerHTML = this.food_type;
+                    foods.innerHTML = this.foods;
+                    food_update_id.innerHTML = this.food_update_id;
+                    checkin.innerHTML = this.checkin;
+
+
+                    if(this.foods == "AlreadyServed"){
+                        console.log("alreadyserverd");
+                        //$('.status').css("color", "red");
+
+
+                        trElement.appendChild(nameEle);
+                        trElement.appendChild(emailEle);
+                        trElement.appendChild(lunchc);
+						trElement.appendChild(dinnervc);
+						trElement.appendChild(dinnernvc);
+						trElement.appendChild(dinnerkc);
+						trElement.appendChild(snacksvegc);
+						trElement.appendChild(snacksnvegc);
+						trElement.appendChild(dinnervcount);
+						trElement.appendChild(dinnernvcount);
+						trElement.appendChild(dinnerkidcount);
+						trElement.appendChild(totaldinnercount);
+						trElement.appendChild(barcodenum);
+						trElement.appendChild(food_type);
+                        trElement.appendChild(foods);
+                        trElement.appendChild(food_update_id);
+                        trElement.appendChild(checkin);
+                        tbodyElement.appendChild(trElement);
+                        tableElement.appendChild(tbodyElement);
+
+                        var table = document.getElementById("table");
+
+                        var rows = table.getElementsByTagName("tr");
+                        console.log(rows.length);
+
+                        for(i = 0; i < rows.length; i++){
+
+                      //manipulate rows
+
+
+                          if(i == 1){
+                             console.log(i);
+                            rows[i].className = "odd";
+                            }
+                            }
+                    }
+                    else if(this.checkin == "completed" || this.checkin == "invalidcoupon"){
+                        console.log("invalidcoupon");
+                        //$('.status').css("color", "red");
+
+
+                        trElement.appendChild(nameEle);
+                        trElement.appendChild(emailEle);
+                        trElement.appendChild(lunchc);
+						trElement.appendChild(dinnervc);
+						trElement.appendChild(dinnernvc);
+						trElement.appendChild(dinnerkc);
+                        trElement.appendChild(snacksvegc);
+						trElement.appendChild(snacksnvegc);
+						trElement.appendChild(dinnervcount);
+						trElement.appendChild(dinnernvcount);
+						trElement.appendChild(dinnerkidcount);
+						trElement.appendChild(totaldinnercount);
+						trElement.appendChild(barcodenum);
+						trElement.appendChild(food_type);
+                        trElement.appendChild(foods);
+                        trElement.appendChild(food_update_id);
+                        trElement.appendChild(checkin);
+                        tbodyElement.appendChild(trElement);
+                        tableElement.appendChild(tbodyElement);
+
+
+                        console.log("rsvp count");
+
+
+
+
+                        var table = document.getElementById("table");
+
+                        var rows = table.getElementsByTagName("tr");
+                        console.log(rows.length);
+
+                        for(i = 0; i < rows.length; i++){
+
+                      //manipulate rows
+
+
+                          if(i == 1){
+                             console.log(i);
+                            rows[i].className = "invalid";
+                            }
+                            }
+
+
+                    }
+
+                    else{
+                        trElement.appendChild(nameEle);
+                        trElement.appendChild(emailEle);
+                        trElement.appendChild(lunchc);
+						trElement.appendChild(dinnervc);
+						trElement.appendChild(dinnernvc);
+						trElement.appendChild(dinnerkc);
+                        trElement.appendChild(snacksvegc);
+						trElement.appendChild(snacksnvegc);
+						trElement.appendChild(dinnervcount);
+						trElement.appendChild(dinnernvcount);
+						trElement.appendChild(dinnerkidcount);
+						trElement.appendChild(totaldinnercount);
+						trElement.appendChild(barcodenum);
+						trElement.appendChild(food_type);
+                        trElement.appendChild(foods);
+                        trElement.appendChild(food_update_id);
+                        trElement.appendChild(checkin);
+                        tbodyElement.appendChild(trElement);
+                        tableElement.appendChild(tbodyElement);
+
+                        var table = document.getElementById("table");
+
+                        var rows = table.getElementsByTagName("tr");
+                        console.log(rows.length);
+
+                        for(i = 0; i < rows.length; i++){
+
+                      //manipulate rows
+
+
+                          if(i == 1){
+                             console.log(i);
+                            rows[i].className = "even";
+                            }
+                            }
+                    }
+                 });
+        }
+     })
+            code = "";
+         }
+    } else {
+        code += e.key; //while this is not an 'enter' it stores the every key
+     }
+
+    //run a timeout of 200ms at the first read and clear everything
+    if(!reading) {
+        reading = true;
+        setTimeout(() => {
+            code = "";
+            reading = false;
+        }, 200);  //200 works fine for me but you can adjust it
+    }
+});
+</script>
+
+{% endblock content %}

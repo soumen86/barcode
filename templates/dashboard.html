@@ -46,6 +46,7 @@
                 <th>Food Type</th>
                 <th>Barcode</th>
                 <th>Service</th>
+                <th>food_update_id</th>
             </thead>
             {% for value in details_info %}
             <tr>
@@ -56,6 +57,7 @@
                 <td>{{ value.food_type }}</td>
                 <td>{{ value.barcode_num }}</td>
                 <td>{{ value.food_service }}</td>
+                <td>{{value.food_update_id}}</td>
              </tr>
         {% endfor %}
         </table>

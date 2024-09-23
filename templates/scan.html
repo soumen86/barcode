@@ -23,8 +23,14 @@
 						<th>Dinner Veg Cupon</th>
 						<th>Dinner NonVeg Cupon</th>
 						<th>Dinner Kid Cupon</th>
+                        <th>Dinner veg count</th>
+                        <th>Dinner non-veg count</th>
+                        <th>Dinner kid count</th>
+                        <th>Total dinner</th>
+                        <th>Barcode Num</th>
 						<th>Food Type</th>
                         <th>Food Serviced</th>
+                        <th>food_update_id</th>
                     </tr>
                 </thead>
             </table>
@@ -50,7 +56,9 @@ div#tables {
   }
   .odd{background-color: yellow;}
 
-  .even{background-color: red;}
+  .even{background-color: green;}
+
+  .invalid{background-color: red;}
 
 
 
@@ -95,8 +103,14 @@ document.addEventListener('keypress', e => {
 			const dinnervc = document.createElement('td');
 			const dinnernvc = document.createElement('td');
 			const dinnerkc = document.createElement('td');
+			const dinnervcount = document.createElement('td');
+			const dinnernvcount = document.createElement('td');
+			const dinnerkidcount = document.createElement('td');
+			const totaldinnercount = document.createElement('td');
+			const barcodenum = document.createElement('td');
 			const food_type = document.createElement('td');
             const foods = document.createElement('td');
+            const food_update_id = document.createElement('td');
 
             $.each(data.barcode_data, function () {
                      console.log(this.name);
@@ -106,8 +120,14 @@ document.addEventListener('keypress', e => {
 					dinnervc.innerHTML = this.dinnerv;
 					dinnernvc.innerHTML = this.dinnernv;
 					dinnerkc.innerHTML = this.dinnerkid;
+					dinnervcount.innerHTML = this.Dinner_veg;
+					dinnernvcount.innerHTML = this.Dinner_nveg;
+					dinnerkidcount.innerHTML = this.Dinner_kid;
+					totaldinnercount.innerHTML = this.total_dinner;
+					barcodenum.innerHTML = this.barcode_num;
 					food_type.innerHTML = this.food_type;
                     foods.innerHTML = this.foods;
+                    food_update_id.innerHTML = this.food_update_id;
                     if(this.foods == "AlreadyServed"){
                         console.log("alreadyserverd");
                         //$('.status').css("color", "red");
@@ -119,8 +139,14 @@ document.addEventListener('keypress', e => {
 						trElement.appendChild(dinnervc);
 						trElement.appendChild(dinnernvc);
 						trElement.appendChild(dinnerkc);
+						trElement.appendChild(dinnervcount);
+						trElement.appendChild(dinnernvcount);
+						trElement.appendChild(dinnerkidcount);
+						trElement.appendChild(totaldinnercount);
+						trElement.appendChild(barcodenum);
 						trElement.appendChild(food_type);
                         trElement.appendChild(foods);
+                        trElement.appendChild(food_update_id);
                         tbodyElement.appendChild(trElement);
                         tableElement.appendChild(tbodyElement);
 
@@ -140,6 +166,45 @@ document.addEventListener('keypress', e => {
                             }
                             }
                     }
+                    else if(this.foods == "invalidcoupon"){
+                        console.log("invalidcoupon");
+                        //$('.status').css("color", "red");
+
+
+                        trElement.appendChild(nameEle);
+                        trElement.appendChild(emailEle);
+                        trElement.appendChild(lunchc);
+						trElement.appendChild(dinnervc);
+						trElement.appendChild(dinnernvc);
+						trElement.appendChild(dinnerkc);
+						trElement.appendChild(dinnervcount);
+						trElement.appendChild(dinnernvcount);
+						trElement.appendChild(dinnerkidcount);
+						trElement.appendChild(totaldinnercount);
+						trElement.appendChild(barcodenum);
+						trElement.appendChild(food_type);
+                        trElement.appendChild(foods);
+                        trElement.appendChild(food_update_id);
+                        tbodyElement.appendChild(trElement);
+                        tableElement.appendChild(tbodyElement);
+
+                        var table = document.getElementById("table");
+
+                        var rows = table.getElementsByTagName("tr");
+                        console.log(rows.length);
+
+                        for(i = 0; i < rows.length; i++){
+
+                      //manipulate rows
+
+
+                          if(i == 1){
+                             console.log(i);
+                            rows[i].className = "invalid";
+                            }
+                            }
+                    }
+
                     else{
                         trElement.appendChild(nameEle);
                         trElement.appendChild(emailEle);
@@ -147,10 +212,32 @@ document.addEventListener('keypress', e => {
 						trElement.appendChild(dinnervc);
 						trElement.appendChild(dinnernvc);
 						trElement.appendChild(dinnerkc);
+						trElement.appendChild(dinnervcount);
+						trElement.appendChild(dinnernvcount);
+						trElement.appendChild(dinnerkidcount);
+						trElement.appendChild(totaldinnercount);
+						trElement.appendChild(barcodenum);
 						trElement.appendChild(food_type);
                         trElement.appendChild(foods);
+                        trElement.appendChild(food_update_id);
                         tbodyElement.appendChild(trElement);
                         tableElement.appendChild(tbodyElement);
+
+                        var table = document.getElementById("table");
+
+                        var rows = table.getElementsByTagName("tr");
+                        console.log(rows.length);
+
+                        for(i = 0; i < rows.length; i++){
+
+                      //manipulate rows
+
+
+                          if(i == 1){
+                             console.log(i);
+                            rows[i].className = "even";
+                            }
+                            }
                     }
                  });
         }
